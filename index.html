@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>غرفة شات مباشرة</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
+        body { background: #e5ddd5; display: flex; flex-direction: column; height: 100vh; }
+        .chat-header { background: #075e54; color: white; padding: 15px; text-align: center; font-weight: bold; font-size: 18px; }
+        .identity-box { background: #fff3cd; padding: 10px; text-align: center; font-size: 14px; }
+        .identity-box select { padding: 5px; font-weight: bold; }
+        .chat-box { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+        .msg { max-width: 75%; padding: 10px 14px; border-radius: 12px; font-size: 15px; box-shadow: 0 1px 1px rgba(0,0,0,0.1); }
+        .msg.rabah { background: #d9fdd3; align-self: flex-start; }
+        .msg.teacher { background: #ffffff; align-self: flex-end; }
+        .msg-sender { font-weight: bold; display: block; font-size: 12px; color: #075e54; margin-bottom: 3px; }
+        .input-area { background: #f0f0f0; padding: 12px; display: flex; gap: 10px; }
+        .input-area input { flex: 1; padding: 12px; border: 1px solid #fff; border-radius: 20px; outline: none; }
+        .input-area button { background: #075e54; color: white; border: none; padding: 0 20px; border-radius: 20px; font-weight: bold; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <div class="chat-header">💬 غرفة المحادثة المباشرة (رأبح والأستاذ)</div>
+
+    
+        <label>أنت تتحدث الآن بصفتك: </label>
+        <select id="userSelect">
+            <option value="rabah">رأبح (أنت)</option>
+            <option value="teacher">الأستاذ</option>
+        </select>
+    </div>
+
+    <div class="chat-box" id="chatBox">
+        <p style="text-align:center; color:#666;">أهلاً بكما في الغرفة! اكتب رسالتك واضغط إرسال.</p>
+    </div>
+
+    <form class="input-area" id="messageForm">
+        <input type="text" id="msgInput" placeholder="اكتب رسالتك هنا..." required autocomplete="off">
+        <button type="submit">إرسال</button>
+    </form>
+
+<script>
+    const chatBox = document.getElementById("chatBox");
+    const messageForm = document.getElementById("messageForm");
+    const msgInput = document.getElementById("msgInput");
+    const userSelect = document.getElementById("userSelect");
+
+    // مصفوفة لتخزين الرسائل مؤقتاً في المتصفح لضمان عملها فوراً أمامك
+    let messages = JSON.parse(localStorage.getItem('local_chat')) || [];
+
+    function renderChat() {
+        if (messages.length > 0) {
+            chatBox.innerHTML = "";
+            messages.forEach(msg => {
+                const cardClass = msg.sender === 'rabah' ? 'rabah' : 'teacher';
+                const senderName = msg.sender === 'rabah' ? 'رأبح' : 'الأستاذ';
+                chatBox.innerHTML += `
+                    <div class="msg ${cardClass}">
+                        <span class="msg-sender">${senderName}</span>
+                        ${msg.text}
+                    </div>`;
+            });
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+    }
+
+    messageForm.addEventListener("submit", function(e) {
+        e.preventDefault();
+        const text = msgInput.value.trim();
+        if (!text) return;
+
+        messages.push({
+            sender: userSelect.value,
+            text: text
+        });
+
+        localStorage.setItem('local_chat', JSON.stringify(messages));
+        msgInput.value = "";
+        renderChat();
+    });
+
+    // تحديث الشاشة فوراً
+    renderChat();
+</script>
+</body>
+</html>
